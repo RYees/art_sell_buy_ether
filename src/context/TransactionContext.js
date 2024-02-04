@@ -48,11 +48,13 @@ const sampleData = [
 export const TransactionsProvider = ({ children }) => {
     const [dataFetched, updateFetched] = useState(false);
     const [data, updateData] = useState(sampleData);
+    const [profileDataFetched, updateProfileData] = useState(sampleData);
     const [singleDataFetched, updateDataFetched] = useState({});
     const [filterdata, updateDataFilter] = useState(false);
     const [textmessage, setupMessage] = useState('');
     const [message, updateMessage] = useState('');
     const [currentAccount, setCurrentAccount] = useState("");
+    const [totalPrice, updateTotalPrice] = useState("0");
     const [formParams, updateFormParams] = useState({ name: '', description: '', price: ''});
 
     const checkIfWalletIsConnect = async () => {
@@ -74,7 +76,7 @@ export const TransactionsProvider = ({ children }) => {
     const checkIfTransactionsExists = async () => {
         try {
             if (ethereum) {
-                const transactionsContract = createEthereumContract();
+                //const transactionsContract = createEthereumContract();
                 console.log('Connect to your sepolia metamask account!');
             }
         } catch (error) {
@@ -225,6 +227,35 @@ export const TransactionsProvider = ({ children }) => {
         }
     }
 
+    async function getMyNFTData(tokenId) {
+        let sumPrice = 0;
+        const contract = createEthereumContract();
+
+        //create an NFT Token
+        let transaction = await contract.getMyNFTs()        
+        const items = await Promise.all(transaction.map(async i => {
+            const tokenURI = await contract.tokenURI(i.tokenId);
+            let meta = await axios.get(tokenURI);
+            meta = meta.data;
+
+            let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
+            let item = {
+                price,
+                tokenId: i.tokenId.toNumber(),
+                seller: i.seller,
+                owner: i.owner,
+                image: meta.image,
+                name: meta.name,
+                description: meta.description,
+            }
+            sumPrice += Number(price);
+            return item;
+        }))
+
+        updateProfileData(items);
+        updateTotalPrice(sumPrice.toPrecision(3));
+    }
+
     useEffect(() => {
         checkIfWalletIsConnect();
         checkIfTransactionsExists();
@@ -245,8 +276,11 @@ export const TransactionsProvider = ({ children }) => {
         message,
         getNFTData,
         buyNFT,
+        getMyNFTData,
         singleDataFetched,
-        filterdata
+        filterdata,
+        profileDataFetched,
+        totalPrice
         }}
       >
       {children}
