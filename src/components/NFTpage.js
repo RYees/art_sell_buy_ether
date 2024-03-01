@@ -5,7 +5,11 @@ import { TransactionContext } from '../context/TransactionContext';
 
 export default function NFTPage (props) {
     const { currentAccount, filterdata, message, buyNFT, getNFTData, singleDataFetched } = useContext(TransactionContext);
-
+// console.log("f", currentAccount === singleDataFetched.seller)
+// console.log(typeof currentAccount, currentAccount);
+// console.log(typeof singleDataFetched.seller, singleDataFetched.seller);
+// console.log("f", currentAccount.toLowerCase() === singleDataFetched.seller.toLowerCase());
+// Output: true
     const params = useParams();
     const tokenId = params.tokenId;
     useEffect(() => {

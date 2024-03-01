@@ -7,6 +7,7 @@ import { TransactionContext } from '../context/TransactionContext';
 
 export default function Marketplace() {
 const { getAllNFTs, dataFetched, data } = useContext(TransactionContext);
+console.log("game", data)
 
 if(!dataFetched)
     getAllNFTs();
